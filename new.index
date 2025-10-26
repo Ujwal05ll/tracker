@@ -1,264 +1,288 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Student Tracker - Attendance & Performance Management</title>
-  <style>
-/* ---- BEGIN STYLE.CSS ---- */
-:root {
-  /* Primitive Color Tokens */
-  --color-white: rgba(255, 255, 255, 1);
-  --color-black: rgba(0, 0, 0, 1);
-  --color-cream-50: rgba(252, 252, 249, 1);
-  --color-cream-100: rgba(255, 255, 253, 1);
-  --color-gray-200: rgba(245, 245, 245, 1);
-  --color-gray-300: rgba(167, 169, 169, 1);
-  --color-gray-400: rgba(119, 124, 124, 1);
-  --color-slate-500: rgba(98, 108, 113, 1);
-  --color-brown-600: rgba(94, 82, 64, 1);
-  --color-charcoal-700: rgba(31, 33, 33, 1);
-  --color-charcoal-800: rgba(38, 40, 40, 1);
-  --color-slate-900: rgba(19, 52, 59, 1);
-  --color-teal-300: rgba(50, 184, 198, 1);
-  --color-teal-400: rgba(45, 166, 178, 1);
-  --color-teal-500: rgba(33, 128, 141, 1);
-  --color-teal-600: rgba(29, 116, 128, 1);
-  --color-teal-700: rgba(26, 104, 115, 1);
-  --color-teal-800: rgba(41, 150, 161, 1);
-  --color-red-400: rgba(255, 84, 89, 1);
-  --color-red-500: rgba(192, 21, 47, 1);
-  --color-orange-400: rgba(230, 129, 97, 1);
-  --color-orange-500: rgba(168, 75, 47, 1);
-/* ... rest of your css ... (content truncated for brevity) ... */
-/* Paste your full style.css here (as you provided above). */
-  /* ...END CSS... */
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Tracker</title>
+<style>
+  :root {
+    --primary-color: #21808d;
+    --secondary-color: #2d8eb2;
+    --danger-color: #c0152f;
+    --bg-color: #f5f5f5;
+    --card-bg: #fff;
+    --text-color: #1f2121;
+  }
+  * { box-sizing: border-box; margin:0; padding:0; font-family: Arial, sans-serif; }
+  body { background-color: var(--bg-color); color: var(--text-color); }
+  .hidden { display: none; }
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* Login Page */
+  .login-container { display:flex; justify-content:center; align-items:center; height:100vh; }
+  .login-card { background: var(--card-bg); padding:30px; border-radius:10px; width:350px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);}
+  .login-title { text-align:center; margin-bottom:10px; }
+  .login-subtitle { text-align:center; margin-bottom:20px; font-size: 0.9em; color: gray; }
+  .tab-btn { flex:1; padding:10px; cursor:pointer; border:none; background:#eee; margin:0 2px; border-radius:5px; }
+  .tab-btn.active { background: var(--primary-color); color:white; }
+  .login-tabs { display:flex; margin-bottom:15px; }
+  .form-group { margin-bottom:15px; }
+  .form-control { width:100%; padding:8px; border:1px solid #ccc; border-radius:5px; }
+  .btn { cursor:pointer; border:none; border-radius:5px; padding:10px; }
+  .btn-primary { background: var(--primary-color); color:white; width:100%; }
+  .btn-secondary { background: #ccc; color:black; }
+
+  /* Portal */
+  .topnav { background: var(--primary-color); color:white; padding:10px; display:flex; justify-content:space-between; }
+  .portal-container { display:flex; min-height:calc(100vh - 50px); }
+  .sidebar { width:200px; background:#333; color:white; padding:15px; }
+  .sidebar .nav-link { display:block; color:white; padding:10px; text-decoration:none; margin-bottom:5px; border-radius:5px; }
+  .sidebar .nav-link.active, .sidebar .nav-link:hover { background: var(--secondary-color); }
+  .main-content { flex:1; padding:20px; }
+  .breadcrumb { font-size:0.9em; margin-bottom:10px; color: gray; }
+
+  .stats-grid { display:flex; gap:15px; margin-bottom:20px; }
+  .stat-card { background:white; flex:1; padding:15px; border-radius:8px; text-align:center; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+  .stat-value { font-size:1.5em; font-weight:bold; }
+
+  table { width:100%; border-collapse: collapse; margin-bottom:15px; }
+  th, td { border:1px solid #ccc; padding:8px; text-align:center; }
+  th { background:#eee; }
+
+  .attendance-form, .performance-form { background:white; padding:15px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1);}
+  .form-row { display:flex; gap:10px; }
+  .form-row .form-group { flex:1; }
+  textarea.form-control { resize:none; }
+</style>
 </head>
 <body>
-    <!-- Notification System -->
-    <div id="notification" class="notification hidden"></div>
-    <!-- Login Page -->
-    <div id="loginPage" class="page active">
-        <div class="login-container">
-            <div class="login-card">
-                <h1 class="login-title">Student Tracker</h1>
-                <p class="login-subtitle">Attendance & Performance Management System</p>
-                <div class="login-tabs">
-                    <button class="tab-btn active" data-tab="faculty">Faculty Login</button>
-                    <button class="tab-btn" data-tab="student">Student Login</button>
-                </div>
-                <!-- Faculty Login Form -->
-                <form id="facultyLoginForm" class="login-form active">
-                    <div class="form-group">
-                        <label for="facultyUsername">Username</label>
-                        <input type="text" id="facultyUsername" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="facultyPassword">Password</label>
-                        <input type="password" id="facultyPassword" class="form-control" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-block">Login as Faculty</button>
-                </form>
-                <!-- Student Login Form -->
-                <form id="studentLoginForm" class="login-form">
-                    <div class="form-group">
-                        <label for="studentUsername">Username</label>
-                        <input type="text" id="studentUsername" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="studentPassword">Password</label>
-                        <input type="password" id="studentPassword" class="form-control" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-block">Login as Student</button>
-                </form>
-            </div>
+
+<!-- Login Page -->
+<div id="loginPage" class="page active">
+  <div class="login-container">
+    <div class="login-card">
+      <h1 class="login-title">Student Tracker</h1>
+      <p class="login-subtitle">Attendance & Performance System</p>
+      <div class="login-tabs">
+        <button class="tab-btn active" data-tab="faculty">Faculty</button>
+        <button class="tab-btn" data-tab="student">Student</button>
+      </div>
+      <form id="facultyLoginForm" class="login-form active">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="facultyUsername" class="form-control" required>
         </div>
-    </div>
-    <!-- Faculty Portal -->
-    <div id="facultyPortal" class="page">
-        <!-- Top Navigation -->
-        <nav class="topnav">
-            <div class="nav-content">
-                <div class="nav-brand">Student Tracker - Faculty Portal</div>
-                <button class="btn btn-secondary btn-sm" id="facultyLogout">Logout</button>
-            </div>
-        </nav>
-        <div class="portal-container">
-            <!-- Sidebar -->
-            <aside class="sidebar">
-                <ul class="nav-menu">
-                    <li><a href="#" class="nav-link active" data-view="facultyDashboard">Dashboard</a></li>
-                    <li><a href="#" class="nav-link" data-view="markAttendance">Mark Attendance</a></li>
-                    <li><a href="#" class="nav-link" data-view="enterPerformance">Enter Performance</a></li>
-                    <li><a href="#" class="nav-link" data-view="viewReports">View Reports</a></li>
-                    <li><a href="#" class="nav-link" data-view="studentManagement">Student Management</a></li>
-                </ul>
-            </aside>
-            <!-- Main Content Area -->
-            <main class="main-content">
-                <!-- Faculty Dashboard -->
-                <div id="facultyDashboard" class="view active">
-                    <div class="breadcrumb">Home / Dashboard</div>
-                    <h2>Faculty Dashboard</h2>
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-value" id="totalStudents">0</div>
-                            <div class="stat-label">Total Students</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-value" id="todayPresent">0</div>
-                            <div class="stat-label">Present Today</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-value" id="todayAbsent">0</div>
-                            <div class="stat-label">Absent Today</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-value" id="todayLate">0</div>
-                            <div class="stat-label">Late Today</div>
-                        </div>
-                    </div>
-                    <div class="dashboard-sections">
-                        <div class="section-card">
-                            <h3>Recent Performance</h3>
-                            <div id="recentPerformance"></div>
-                        </div>
-                        <div class="section-card">
-                            <h3>Quick Actions</h3>
-                            <div class="quick-actions">
-                                <button class="btn btn-primary" data-view="markAttendance">Mark Attendance</button>
-                                <button class="btn btn-primary" data-view="enterPerformance">Enter Performance</button>
-                                <button class="btn btn-secondary" data-view="viewReports">View Reports</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- Mark Attendance -->
-                <div id="markAttendance" class="view">
-                    <div class="breadcrumb">Home / Mark Attendance</div>
-                    <h2>Mark Attendance</h2>
-                    <form id="attendanceForm" class="attendance-form">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="attendanceDate">Date</label>
-                                <input type="date" id="attendanceDate" class="form-control" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="attendanceClass">Class/Section</label>
-                                <select id="attendanceClass" class="form-control" required>
-                                    <option value="Computer Science A">Computer Science A</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="attendance-table-wrapper">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Roll No.</th>
-                                        <th>Student Name</th>
-                                        <th>Present</th>
-                                        <th>Absent</th>
-                                        <th>Late</th>
-                                        <th>Excused</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="attendanceTableBody"></tbody>
-                            </table>
-                        </div>
-                        <div class="attendance-summary" id="attendanceSummary"></div>
-                        <button type="submit" class="btn btn-primary">Submit Attendance</button>
-                    </form>
-                </div>
-                <!-- Enter Performance -->
-                <div id="enterPerformance" class="view">
-                    <div class="breadcrumb">Home / Enter Performance</div>
-                    <h2>Enter Performance</h2>
-                    <form id="performanceForm" class="performance-form">
-                        <div class="form-group">
-                            <label for="perfStudent">Select Student</label>
-                            <select id="perfStudent" class="form-control" required></select>
-                        </div>
-                        <div class="form-group">
-                            <label for="perfSubject">Subject</label>
-                            <select id="perfSubject" class="form-control" required>
-                                <option value="Mathematics">Mathematics</option>
-                                <option value="Physics">Physics</option>
-                                <option value="Chemistry">Chemistry</option>
-                                <option value="Computer Science">Computer Science</option>
-                                <option value="English">English</option>
-                                <option value="Data Structures">Data Structures</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="perfType">Assessment Type</label>
-                            <select id="perfType" class="form-control" required>
-                                <option value="Quiz">Quiz</option>
-                                <option value="Assignment">Assignment</option>
-                                <option value="Midterm">Midterm</option>
-                                <option value="Final Exam">Final Exam</option>
-                                <option value="Project">Project</option>
-                                <option value="Practical">Practical</option>
-                            </select>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="perfScore">Score</label>
-                                <input type="number" id="perfScore" class="form-control" min="0" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="perfMaxScore">Maximum Marks</label>
-                                <input type="number" id="perfMaxScore" class="form-control" min="1" required>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="perfComments">Comments/Feedback</label>
-                            <textarea id="perfComments" class="form-control" rows="3"></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Submit Performance</button>
-                    </form>
-                </div>
-                <!-- View Reports -->
-                <!-- ... (rest of Faculty Portal HTML as you provided) ... -->
-            </main>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="facultyPassword" class="form-control" required>
         </div>
-    </div>
-    <!-- Student Portal -->
-    <div id="studentPortal" class="page">
-        <!-- Top Navigation -->
-        <nav class="topnav">
-            <div class="nav-content">
-                <div class="nav-brand">Student Tracker - Student Portal</div>
-                <button class="btn btn-secondary btn-sm" id="studentLogout">Logout</button>
-            </div>
-        </nav>
-        <div class="portal-container">
-            <!-- Sidebar and Main Content -->
-            <!-- ... (rest of Student Portal HTML as you provided) ... -->
+        <button type="submit" class="btn btn-primary">Login as Faculty</button>
+      </form>
+      <form id="studentLoginForm" class="login-form">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="studentUsername" class="form-control" required>
         </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="studentPassword" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Login as Student</button>
+      </form>
     </div>
-    <script>
-/* ---- BEGIN APP.JS ---- */
-// Data Storage
+  </div>
+</div>
+
+<!-- Faculty Portal -->
+<div id="facultyPortal" class="page">
+  <nav class="topnav">
+    <div>Faculty Portal</div>
+    <button class="btn btn-secondary" id="facultyLogout">Logout</button>
+  </nav>
+  <div class="portal-container">
+    <aside class="sidebar">
+      <a href="#" class="nav-link active" data-view="facultyDashboard">Dashboard</a>
+      <a href="#" class="nav-link" data-view="markAttendance">Mark Attendance</a>
+      <a href="#" class="nav-link" data-view="enterPerformance">Enter Performance</a>
+    </aside>
+    <main class="main-content">
+      <!-- Dashboard -->
+      <div id="facultyDashboard" class="view active">
+        <div class="breadcrumb">Home / Dashboard</div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-value" id="totalStudents">0</div><div>Total Students</div></div>
+          <div class="stat-card"><div class="stat-value" id="todayPresent">0</div><div>Present Today</div></div>
+          <div class="stat-card"><div class="stat-value" id="todayAbsent">0</div><div>Absent Today</div></div>
+        </div>
+      </div>
+
+      <!-- Mark Attendance -->
+      <div id="markAttendance" class="view">
+        <div class="breadcrumb">Home / Mark Attendance</div>
+        <form id="attendanceForm" class="attendance-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Date</label>
+              <input type="date" id="attendanceDate" class="form-control" required>
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Roll No.</th>
+                <th>Name</th>
+                <th>Present</th>
+                <th>Absent</th>
+                <th>Late</th>
+              </tr>
+            </thead>
+            <tbody id="attendanceTableBody"></tbody>
+          </table>
+          <button type="submit" class="btn btn-primary">Submit Attendance</button>
+        </form>
+      </div>
+
+      <!-- Enter Performance -->
+      <div id="enterPerformance" class="view">
+        <div class="breadcrumb">Home / Enter Performance</div>
+        <form id="performanceForm" class="performance-form">
+          <div class="form-group">
+            <label>Select Student</label>
+            <select id="perfStudent" class="form-control" required></select>
+          </div>
+          <div class="form-group">
+            <label>Subject</label>
+            <select id="perfSubject" class="form-control" required>
+              <option>Math</option>
+              <option>Physics</option>
+              <option>Chemistry</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Score</label>
+            <input type="number" id="perfScore" class="form-control" min="0" required>
+          </div>
+          <button type="submit" class="btn btn-primary">Submit Performance</button>
+        </form>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Student Portal -->
+<div id="studentPortal" class="page">
+  <nav class="topnav">
+    <div>Student Portal</div>
+    <button class="btn btn-secondary" id="studentLogout">Logout</button>
+  </nav>
+  <div class="portal-container">
+    <main class="main-content">
+      <div id="studentDashboard" class="view active">
+        <h2>Welcome Student!</h2>
+        <div id="studentInfo"></div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
 let students = [
-    { id: 1, name: "Rahul Sharma", roll_number: "CS2024001", class: "Computer Science A", email: "rahul@school.com" },
-    { id: 2, name: "Priya Patel", roll_number: "CS2024002", class: "Computer Science A", email: "priya@school.com" },
-    { id: 3, name: "Amit Kumar", roll_number: "CS2024003", class: "Computer Science A", email: "amit@school.com" },
-    { id: 4, name: "Sneha Singh", roll_number: "CS2024004", class: "Computer Science A", email: "sneha@school.com" },
-    { id: 5, name: "Rohan Verma", roll_number: "CS2024005", class: "Computer Science A", email: "rohan@school.com" },
-    { id: 6, name: "Anjali Gupta", roll_number: "CS2024006", class: "Computer Science A", email: "anjali@school.com" },
-    { id: 7, name: "Vikram Reddy", roll_number: "CS2024007", class: "Computer Science A", email: "vikram@school.com" },
-    { id: 8, name: "Pooja Nair", roll_number: "CS2024008", class: "Computer Science A", email: "pooja@school.com" },
-    { id: 9, name: "Karthik Iyer", roll_number: "CS2024009", class: "Computer Science A", email: "karthik@school.com" },
-    { id: 10, name: "Divya Menon", roll_number: "CS2024010", class: "Computer Science A", email: "divya@school.com" },
-    { id: 11, name: "Arjun Desai", roll_number: "CS2024011", class: "Computer Science A", email: "arjun@school.com" },
-    { id: 12, name: "Meera Joshi", roll_number: "CS2024012", class: "Computer Science A", email: "meera@school.com" },
-    { id: 13, name: "Sanjay Pillai", roll_number: "CS2024013", class: "Computer Science A", email: "sanjay@school.com" },
-    { id: 14, name: "Kavya Rao", roll_number: "CS2024014", class: "Computer Science A", email: "kavya@school.com" },
-    { id: 15, name: "Nikhil Shetty", roll_number: "CS2024015", class: "Computer Science A", email: "nikhil@school.com" }
+  { id: 1, name: "Rahul Sharma", roll_number: "CS2024001", class: "Computer Science A" },
+  { id: 2, name: "Priya Patel", roll_number: "CS2024002", class: "Computer Science A" },
+  { id: 3, name: "Amit Kumar", roll_number: "CS2024003", class: "Computer Science A" },
 ];
-/* ... rest of your app.js ... (content truncated for brevity) ... */
-/* Paste your full app.js here (as you provided above). */
-    </script>
+
+// ----- Login Tab Switch -----
+document.querySelectorAll(".tab-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    document.querySelectorAll(".login-form").forEach(f=>f.classList.remove("active"));
+    document.getElementById(btn.dataset.tab+"LoginForm").classList.add("active");
+  });
+});
+
+// ----- Faculty Login -----
+document.getElementById("facultyLoginForm").addEventListener("submit", e=>{
+  e.preventDefault();
+  document.getElementById("loginPage").classList.remove("active");
+  document.getElementById("facultyPortal").classList.add("active");
+  loadAttendanceTable();
+  document.getElementById("totalStudents").textContent = students.length;
+});
+
+// ----- Student Login -----
+document.getElementById("studentLoginForm").addEventListener("submit", e=>{
+  e.preventDefault();
+  document.getElementById("loginPage").classList.remove("active");
+  document.getElementById("studentPortal").classList.add("active");
+  showStudentInfo();
+});
+
+// ----- Logout -----
+document.getElementById("facultyLogout").addEventListener("click", ()=>{
+  document.getElementById("facultyPortal").classList.remove("active");
+  document.getElementById("loginPage").classList.add("active");
+});
+document.getElementById("studentLogout").addEventListener("click", ()=>{
+  document.getElementById("studentPortal").classList.remove("active");
+  document.getElementById("loginPage").classList.add("active");
+});
+
+// ----- Faculty Sidebar Navigation -----
+document.querySelectorAll(".sidebar .nav-link").forEach(link=>{
+  link.addEventListener("click", e=>{
+    e.preventDefault();
+    document.querySelectorAll(".sidebar .nav-link").forEach(l=>l.classList.remove("active"));
+    link.classList.add("active");
+    const view = link.dataset.view;
+    document.querySelectorAll(".main-content .view").forEach(v=>v.classList.remove("active"));
+    document.getElementById(view).classList.add("active");
+  });
+});
+
+// ----- Load Attendance Table -----
+function loadAttendanceTable() {
+  const tbody = document.getElementById("attendanceTableBody");
+  tbody.innerHTML = "";
+  students.forEach(s=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${s.roll_number}</td>
+                    <td>${s.name}</td>
+                    <td><input type="radio" name="att${s.id}" value="present" checked></td>
+                    <td><input type="radio" name="att${s.id}" value="absent"></td>
+                    <td><input type="radio" name="att${s.id}" value="late"></td>`;
+    tbody.appendChild(tr);
+  });
+
+  const studentSelect = document.getElementById("perfStudent");
+  studentSelect.innerHTML = "";
+  students.forEach(s=>{
+    const option = document.createElement("option");
+    option.value = s.id;
+    option.textContent = s.name;
+    studentSelect.appendChild(option);
+  });
+}
+
+// ----- Attendance Submit -----
+document.getElementById("attendanceForm").addEventListener("submit", e=>{
+  e.preventDefault();
+  alert("Attendance submitted successfully!");
+});
+
+// ----- Performance Submit -----
+document.getElementById("performanceForm").addEventListener("submit", e=>{
+  e.preventDefault();
+  alert("Performance submitted successfully!");
+});
+
+// ----- Student Dashboard -----
+function showStudentInfo() {
+  const div = document.getElementById("studentInfo");
+  div.innerHTML = `<p>Total Students: ${students.length}</p>`;
+}
+</script>
 </body>
 </html>
